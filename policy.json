@@ -1,0 +1,36 @@
+{
+  "policy_name": "Corporate Expense Policy v1.0",
+  "decision_map": {
+    "high": "REJECT",
+    "medium": "ESCALATE_TO_HUMAN",
+    "low": "APPROVE_WITH_WARNING",
+    "none": "APPROVE"
+  },
+  "rules": [
+    {"id": "P001", "name": "Receipt required for claims over $25", "severity": "medium", "type": "record",
+     "when": [{"field": "amount", "op": "gt", "value": 25}, {"field": "has_receipt", "op": "eq", "value": false}]},
+
+    {"id": "P002", "name": "Meal cap of $75 per person", "severity": "medium", "type": "record",
+     "when": [{"field": "category", "op": "eq", "value": "meals"}, {"field": "per_person_amount", "op": "gt", "value": 75}]},
+
+    {"id": "P003", "name": "Self-approval is prohibited", "severity": "high", "type": "record",
+     "when": [{"field": "approver_id", "op": "eq", "ref": "employee_id"}]},
+
+    {"id": "P004", "name": "Prohibited vendor / merchant type", "severity": "high", "type": "record",
+     "when": [{"field": "text", "op": "contains_any", "value": ["casino", "liquor", "gambling", "strip club"]}]},
+
+    {"id": "P005", "name": "Weekend spend outside travel category", "severity": "low", "type": "record",
+     "when": [{"field": "is_weekend", "op": "eq", "value": true}, {"field": "category", "op": "ne", "value": "travel"}]},
+
+    {"id": "P006", "name": "Claim submitted more than 60 days after expense", "severity": "medium", "type": "record",
+     "when": [{"field": "days_to_submit", "op": "gt", "value": 60}]},
+
+    {"id": "P007", "name": "Claims over $1000 need approver level >= 4", "severity": "high", "type": "record",
+     "when": [{"field": "amount", "op": "gt", "value": 1000}, {"field": "approver_level", "op": "lt", "value": 4}]},
+
+    {"id": "P008", "name": "Duplicate claim", "severity": "high", "type": "group", "check": "duplicate", "params": {}},
+
+    {"id": "P009", "name": "Split transaction to avoid approval threshold", "severity": "high", "type": "group", "check": "split",
+     "params": {"single_limit": 200, "total_limit": 500, "min_count": 2}}
+  ]
+}
